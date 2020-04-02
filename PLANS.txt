@@ -1,0 +1,13 @@
+
+Need task document
+	Text file with multiple entries per "page" or item
+	
+	Trello would be nice, but limited to collaborator team size
+
+
+Easy 
+DropBox
+
+
+Hard but more skillful
+Git Hub
