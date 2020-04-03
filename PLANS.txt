@@ -1,4 +1,44 @@
 
+
+
+
+
+
+Practical approach
+
+
+Home page - Github
+	recruiitment
+	info
+	tutorials
+	
+Team/task management 
+	Trello (<=1000)
+	One board, multiple lists
+
+Software(s)
+	R + Rstudio
+	Python?
+
+Editing 1
+	Dropbox
+	Need rules for check in, check out.
+
+Editing 2
+	Git
+	Still need rules/notification for who is doing what/when.
+	
+
+Ethos
+
+
+Inclusive
+	Different tasks at different levels
+	
+
+
+
+======================================================
 Need task document
 	Text file with multiple entries per "page" or item
 	
@@ -11,3 +51,4 @@ DropBox
 
 Hard but more skillful
 Git Hub
+
