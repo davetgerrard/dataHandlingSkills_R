@@ -35,13 +35,15 @@ summary(BCECF_data)    # it is good practice to look at the ranges of values
 BCECF_data$ratio <- BCECF_data$F490 / BCECF_data$F440
 head(BCECF_data)
 
+# it may also be useful to have time expressed in minutes
+BCECF_data$T_min <- BCECF_data$T_sec / 60
 
 # LOAD CALLIBRATION DATA ----------------------
 
 cal_data <- read.delim("c:/dataHandlingSkills_R/data/calibration_long.tsv")
 
 # there are multiple measurements per pHi value and we want the mean measurement value for each.
-means <- by(data=8, INDICES=cal_data$pHi, FUN=mean)
+means <- by(data=cal_data$ratio, INDICES=cal_data$pHi, FUN=mean)
 means   # this looks different to other R data types we have seen so far. 
 #  It is a vector of mean values, with the four values of pHi being used as names.
 # However it can be converted to a matrix or data.frame for further use
@@ -85,3 +87,31 @@ text(6, 7.8, expression('NH'[4]*'Cl'))
 #ave(x=cal_data$ratio, as.factor(cal_data$pHi))
 #sweep(cal_data$ratio, MARGIN=as.factor(cal_data$pHi), FUN=mean, )
 #sapply(cal_data$ratioy, FUN=mean)
+
+
+# fit a line-of-best-fit to a subset of the data -----------------
+# we will use T_min rather than T_sec so that the units are in minutes.
+timeWindow <- BCECF_data$T_min >= 9 & BCECF_data$T_min <= 11
+# take a look at "timeWindow"  it is a vector of TRUE/FALSE values
+#  this can now be used as an index to subset (or filter) the full data-set.
+BCECF_data_sub <- BCECF_data[timeWindow, ]
+BCECF_data_sub  
+plot(x=BCECF_data$T_min, y=BCECF_data$pHi, type="l", ylab="Intracellular pH",
+     xlab="Time (min)", las=1, xlim=c(0, 14), ylim=c(7.1, 7.9))
+#points(x=BCECF_data_sub$T_sec/60, y=BCECF_data_sub$pHi, col="green")
+lines(x=BCECF_data_sub$T_min, y=BCECF_data_sub$pHi, col="green")
+abline(v=c(9,11), lty=2)
+
+
+# fit a line to the data subset using lm()
+
+sub.lm <- lm(pHi ~ T_min, data = BCECF_data_sub)
+coef(sub.lm)
+abline(coef=coef(sub.lm), lty=2, col="grey")
+
+# or you can plot just the subset
+plot(x=BCECF_data_sub$T_min, y=BCECF_data_sub$pHi, type="l", ylab="Intracellular pH",
+     xlab="Time (min)", las=1, xlim=c(8, 12), ylim=c(7.1, 7.9))
+abline(coef=coef(sub.lm), lty=2, col="grey")
+
+

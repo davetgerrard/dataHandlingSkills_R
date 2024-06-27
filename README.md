@@ -18,4 +18,5 @@ For absolute beginners, I recommend Dan Navarro's online book ["Learning Statist
 
  - Calculating atomic coordinates [R/atomicCoordinates.R](R/atomicCoordinates.R)
  - Correlation example   [correlationAndLinearModel_absorbance](/R/correlationAndLinearModel_absorbance.R)
- 
+ - Data analysis (pH indicator flourescence)
+ - Publication quality plots
