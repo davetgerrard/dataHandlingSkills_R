@@ -1,0 +1,13 @@
+#	Atomic co-ordinates for spreadsheet exercise 	Angstroms
+Group	Atom	X	Y	Z
+Haem	Fe	15.271	27.962	0.622
+Haem	NA	16.206	29.133	1.939
+Haem	NB	14.91	26.616	2.009
+Haem	NC	14.938	26.541	-0.791
+Haem	ND	16.16	29.164	-0.837
+His 64	ND1	21.239	29.408	0.72
+His 64	NE2	19.782	27.654	-0.107
+His 93	ND1	11.718	30.313	1.33
+His 93	NE2	13.369	28.841	0.659
+His 97	ND1	14.344	33.328	-3.143
+His 97	NE2	14.328	33.344	-0.911
