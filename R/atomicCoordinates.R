@@ -34,7 +34,7 @@ z1 <-coord_data$Z[1]
 # check what we have stored
 c(x1, y1, z1)     # c() is a function to combine several elements. It is not a permanent change. 
 
-#  Now sum the square differences
+#  Now sum the square differences and assign ("<-") this as a new column in our data.frame called coord_data
 coord_data$SS_xyz <- ((coord_data$X - x1) ^ 2)  +  ((coord_data$Y - y1) ^ 2)  +  ((coord_data$Z - z1) ^ 2)
 # note that the calculation above mixes a single value (e.g. x1) with an array or vector of values (e.g. coord_data$X)
 # R "recycles" the single value and uses it repeatedly for every value contained within coord_data$X

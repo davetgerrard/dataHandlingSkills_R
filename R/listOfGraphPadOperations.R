@@ -1,6 +1,19 @@
 
+## Semester 1 - using Excel
 
-##2 
+
+#1.7 - using spreadsheet
+
+# 1.8 graphs and trendlines
+
+# 1.9 data analysis in Excel
+
+#1.10 publication quality graphs.
+
+## Semester 2
+
+
+##2 - using Graphpad
 # 2 One-sample t-test
 
 
