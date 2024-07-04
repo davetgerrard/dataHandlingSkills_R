@@ -13,14 +13,20 @@
 
 # LOADING THE DATA ------------------------------- 
 # load some data from a local file.  comment.char = "#"
+
 coord_data <- read.delim("c:/dataHandlingSkills_R/data/S1.7.Coordinates.tsv", comment.char = "#")
 
 # inspect the data
+
 coord_data
+
 # note that one of the Atoms is labelled <NA> unlike the others.  This is because the string NA has a special meaning in R of "Not Available"
 # we can tell read.delim to look for a different (non-existent) string to represent missing data.
+
 coord_data <- read.delim("c:/dataHandlingSkills_R/data/S1.7.Coordinates.tsv", comment.char = "#",  na.strings="NNN")
+
 # inspect again
+
 coord_data
 
 # Calculating the distance of each atom to the Fe atom in row 1.
@@ -28,33 +34,50 @@ coord_data
 #  square-root of [ ( x2-x1)^2 + ( y2-y1)^2  + ( z2-z1)^2 ] 
 
 # here we are going to use the Fe (row1) coordinates as x1, y1, z1 in every instance
+
 x1 <-coord_data$X[1]   # assign the value for "X" in the first row of coord_data to a new variable called x1
 y1 <-coord_data$Y[1]
 z1 <-coord_data$Z[1]
-# check what we have stored
-c(x1, y1, z1)     # c() is a function to combine several elements. It is not a permanent change. 
 
+# check what we have stored
+
+c(x1, y1, z1)     
+
+# c() is a function to combine several elements. It is not a permanent change. 
 #  Now sum the square differences and assign ("<-") this as a new column in our data.frame called coord_data
+
 coord_data$SS_xyz <- ((coord_data$X - x1) ^ 2)  +  ((coord_data$Y - y1) ^ 2)  +  ((coord_data$Z - z1) ^ 2)
+
 # note that the calculation above mixes a single value (e.g. x1) with an array or vector of values (e.g. coord_data$X)
 # R "recycles" the single value and uses it repeatedly for every value contained within coord_data$X
 # this is a really useful feature of R but one you do sometimes need to think about.
 # To demonstrate this, try these commands. 
+
 1:20     # prints integers from 1 to 20
 1:20/2   # takes those same integers and divides each by 2 - useful recycling of the shorter vector.
+
 # but beware, "recycling" can be made to do bad things as it does not check the lengths of each list you give it.
-(1:20)/(1:2)    # can you work out what happened here?  
+
+(1:20)/(1:2)    
+
+# can you work out what happened here?  
 
 # OK, back to calculating those atomic distances.
 # the final distance is the square-root of what we have calculated so far. 
+
 coord_data$dist <- sqrt(coord_data$SS_xyz)
+
 # check what this looks like
+
 coord_data
 
 # probably we want to save the table with new values into a file to use it later. 
 # It is generally best to store new results in a new file and not write over the original file
+
 outFileName <- "c:/Temp/calculated_Distances.tsv"   # adapt this to somewhere sensible on your computer.
 write.table(coord_data, file=outFileName, row.names=F, sep="\t")
+
 # to find out about this write.table function:-
+
 ?write.table
 

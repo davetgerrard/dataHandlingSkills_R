@@ -16,29 +16,37 @@
 cal_data <- read.delim("c:/dataHandlingSkills_R/data/calibration_long.tsv")
 
 # there are multiple measurements per pHi value and we want the mean measurement value for each.
+
 means <- by(data=cal_data$ratio, INDICES=cal_data$pHi, FUN=mean)
 means   # this looks different to other R data types we have seen so far. 
+
 #  It is a vector of mean values, with the four values of pHi being used as names.
 # However it can be converted to a matrix or data.frame for further use
-#means.m <- as.matrix(means)
+
+#means.m <- as.matrix(means)   # remove the initial # if you want to try this
 means.df <- data.frame(pHi= as.numeric(names(means)), meanRatio = means)
+
 # it's important to convert the mean pHi values back into numbers using as.numeric()
 
 # repeat this procedure but now calculate the standard deviations of each set of ratios
 # there is a function sd() that can be used to get the standard deviation
+
 sdValues <- by(data=cal_data$ratio, INDICES=cal_data$pHi, FUN=sd)
 countValues <- by(data=cal_data$ratio, INDICES=cal_data$pHi, FUN=length)
+
 # to calculate standard errors of the means:  SE = SD / sqrt(N) 
 # where N is the number of observations contributing to each SD (here 4 for all values)
+
 seValues <- sdValues / sqrt(4)
 
 # alternatively each sd value can be divided by a specific count for that set of values
 # this approach works also in cases where each sd is derived from a different number of values.
+
 sdValues / sqrt(countValues)
 
 # now add these values to the data.frame with the means
-means.df$se <- seValues
 
+means.df$se <- seValues
 
 # PLOT the mean values and use the standard error values for error bars.
 
@@ -51,6 +59,7 @@ arrows(x0=means.df$pHi, y0=means.df$meanRatio - means.df$se,
 
 # we will want to fit a straight line to these points and extract the coefficients
 # for the gradient (M) and the intercept (C).
+
 fluor.lm <- lm(meanRatio ~ pHi, data = means.df)
-coef(fluor.lm)
+coef(fluor.lm)   # these will be the same as those calculated in Excel. 
 abline(coef=coef(fluor.lm), lty=2, lwd=2, col="blue")

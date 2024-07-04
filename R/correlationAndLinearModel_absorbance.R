@@ -13,25 +13,36 @@
 
 # LOADING THE DATA -------------------------------
 # load some data from a local file.
+
 absorb_data <- read.delim("c:/dataHandlingSkills_R/data/S1.8.Trendlines.Absorbance.tsv")
+
 # if you type just the name of a variable into the command line, R will try and show you the data
+
 absorb_data
+
 # this is a small data-set, with large data-sets you would typically just look at the 
 #  top rows to check it has loaded correctly.
+
 head(absorb_data)  # by default this shows the first 6 rows, if there are that many
 
 # PLOTTING THE DATA -------------------------------
+
 plot(absorb_data)
+
 # the above does work, but is not good practice as data is not always arranged with exactly two columns
 # it is better to state which data to plot and add some details to the plot
+
 plot(Absorbance ~ Concentration, data=absorb_data)
 
 # here the tilde symbol,  '~' , means "as a function of".  The dependent variable (the y-axis) comes first and then the x-axis variable (the independent) variable comes second.
 # alternatively, you can tell the plot function what to put on the x and y axes
 # Note that now the x-axis variable is specified first. 
+
 plot(x= absorb_data$Concentration, y=absorb_data$Absorbance)
+
 # This  has the advantage that the data does not need to be in the same data object (a data.frame)
 # but the output is not as clean. Let's fix that by specifying the names of the labels
+
 plot(x= absorb_data$Concentration, y=absorb_data$Absorbance, xlab="Concentration", ylab="Absorbance")
 
 # There are often several ways to accomplish the same thing in R!
@@ -39,20 +50,28 @@ plot(x= absorb_data$Concentration, y=absorb_data$Absorbance, xlab="Concentration
 # by default, plot() will try to work out sensible ranges to plot for both axes 
 # so that all the data is shown and not too much excessive white space.
 # Sometimes though we want to control the axes. For example to show 0 for one or both axes
+
 plot(x= absorb_data$Concentration, y=absorb_data$Absorbance, 
      xlab="Concentration", ylab="Absorbance",
      xlim=c(0, 0.6), ylim=c(0, 1.5))
+
 # if you specify xlim and ylim, be careful your range covers all points. 
 # a quick way to check the range of values is using summary()
+
 summary(absorb_data)
 
 # there are many plotting parameters that can be adjusted within the plot() function.  
 # As with other functions in R, to find out about how to use the function, type a ? followed by the function name:-
+
 ?plot()  # you may be asked which help page you want.  Choose plot.default()
+
 # if you read the documentation, you will discover that many common graphical parameters can also be found under:-
+
 ?par    # further plotting parameters
 ?pch    #  to adjust the types of points that are plotted.
+
 # Here is the same plot with a few tweaks
+
 plot(x= absorb_data$Concentration, y=absorb_data$Absorbance, 
      xlab="Concentration (mM)", ylab="Absorbance",
      xlim=c(0, 0.6), ylim=c(0, 1.5), 
@@ -61,8 +80,10 @@ plot(x= absorb_data$Concentration, y=absorb_data$Absorbance,
      cex.axis=1.5, 
      cex.lab = 2, 
      cex.main=2)
+
 # you may find that the labels are now clipped by the edge of the plotting area.
 # you can adjust this by setting the 'margins' 
+
 par(mar=c(5, 7, 4, 2))
 plot(x= absorb_data$Concentration, y=absorb_data$Absorbance, 
      xlab="Concentration (mM)", ylab="Absorbance",
@@ -85,8 +106,9 @@ plot(x= absorb_data$Concentration, y=absorb_data$Absorbance,
 # OR you can tell R to save it in one of a number of file types with a command.
 # To do this you have to open a new file, create the plot and then close the file.
 # Here is an example that creates a .png file. 
+
 outFilePlot <- "C:/Temp/absConcPlot.png"    # choose a name that will work on your computer
-png(filename=outFilePlot)
+png(filename=outFilePlot)  # opens a plotting device pointing to a png file.
 par(mar=c(5, 7, 4, 2))
 plot(x= absorb_data$Concentration, y=absorb_data$Absorbance, 
      xlab="Concentration (mM)", ylab="Absorbance",
@@ -104,17 +126,24 @@ dev.off()    # this closes the file by telling R to close the current plotting d
 # Correlations can be positive or negative and range from -1 to +1.
 #  A value of 0 means there is no correlation.
 # The functino cor() can calculate the correlation
+
 cor(absorb_data$Concentration, absorb_data$Absorbance)
+
 # by default it calculates Pearson's product moment correlation, 
 # which is suitable for continuous data with normally distributed (Gaussian) errors.
 # If your data is not exactly continuous (e.g. you have counts), then you can 
 # use Spearman's rank correlation. 
+
 cor(absorb_data$Concentration, absorb_data$Absorbance, method="spearman")  
 
 # 
 # to compare correlations we make the value +ve by squaring it
+#  This is known as R-squared 
+
 cor(absorb_data$Concentration, absorb_data$Absorbance) ^ 2
-#
+
+# We can test if a correlation is significantly different from zero:-
+
 cor.test(absorb_data$Concentration, absorb_data$Absorbance)
 
 
@@ -122,7 +151,9 @@ cor.test(absorb_data$Concentration, absorb_data$Absorbance)
 # LINEAR REGRESSION AND ADDING A LINE-OF-BEST-FIT (TRENDLINE)  ------------
 # a line-of-best-fit (trendline) can be fit using the method of least squares
 # this is the simplest form of regression analysis and is known as linear regression
+
 abs.lm <- lm(Absorbance ~ Concentration, data = absorb_data)
+
 # the above command fits a straight line (y = mx + c) to the data. 
 # Trying to find values for the parameters 'm' (the gradient) and 'c' the intercept 
 # that minimises the squares of the differences of each point from line in the direction of y-axis.
@@ -130,13 +161,17 @@ abs.lm <- lm(Absorbance ~ Concentration, data = absorb_data)
 coef(abs.lm)  # shows the values of the gradient and intercept
 
 # to show the line of best fit along-side the points, start a new plot
+
 plot(x= absorb_data$Concentration, y=absorb_data$Absorbance, 
      xlab="Concentration", ylab="Absorbance",
      xlim=c(0, 0.6), ylim=c(0, 1.5), pch=19, cex=3, col="red")
+
 # use abline() to plot a straight line with gradient and intercept matching the output from the lm model.
+
 abline(coef= coef(abs.lm) , lwd=3)
 
 # N.B. the plot function does something very different with the model output.
+
 plot(abs.lm)
 
 # does the line need to be forced to go through the origin?

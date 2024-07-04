@@ -12,30 +12,37 @@
 
 # LOADING THE FLUORESCENCE DATA ------------------------------- 
 # load some data from a local file.  comment.char = "#"
+
 BCECF_data <- read.delim("c:/dataHandlingSkills_R/data/BCECF.txt")
 
 # if you try and inspect this data, it will run off the page. 
+
 BCECF_data
 
 # instead, use head() to just check the top
+
 head(BCECF_data)
 
 # ahh, it has converted the first row of data into column headers. We do not want that.
 # reload the data, but specify that the data does not contain a header row.
+
 BCECF_data <- read.delim("c:/dataHandlingSkills_R/data/BCECF.txt", header=F)
 head(BCECF_data)
 
 # let's give the table some meaningful headers
+
 colnames(BCECF_data) <- c("T_sec", "F440", "F490")  
 colnames(BCECF_data)    # note that the same function can be used to assign names and to retrieve the current values.
 head(BCECF_data)  # now has the new names
 summary(BCECF_data)    # it is good practice to look at the ranges of values 
 
 # calculate the ratio of fluorescence values for each sample and store these in a new column
+
 BCECF_data$ratio <- BCECF_data$F490 / BCECF_data$F440
 head(BCECF_data)
 
 # it may also be useful to have time expressed in minutes
+
 BCECF_data$T_min <- BCECF_data$T_sec / 60
 
 # LOAD CALLIBRATION DATA ----------------------
@@ -43,12 +50,17 @@ BCECF_data$T_min <- BCECF_data$T_sec / 60
 cal_data <- read.delim("c:/dataHandlingSkills_R/data/calibration_long.tsv")
 
 # there are multiple measurements per pHi value and we want the mean measurement value for each.
+
 means <- by(data=cal_data$ratio, INDICES=cal_data$pHi, FUN=mean)
-means   # this looks different to other R data types we have seen so far. 
+means   
+
+# this looks different to other R data types we have seen so far. 
 #  It is a vector of mean values, with the four values of pHi being used as names.
 # However it can be converted to a matrix or data.frame for further use
+
 #means.m <- as.matrix(means)
 means.df <- data.frame(pHi= as.numeric(names(means)), meanRatio = means)
+
 # it's important to convert the mean pHi values back into numbers using as.numeric()
 
 plot(means.df, col="blue", pch=19, cex=2, xlab="Intracellular pH", ylab=" Fluorescence ratio",
@@ -56,6 +68,7 @@ plot(means.df, col="blue", pch=19, cex=2, xlab="Intracellular pH", ylab=" Fluore
 
 # we will want to fit a straight line to these points and extract the coefficients
 # for the gradient (M) and the intercept (C).
+
 fluor.lm <- lm(meanRatio ~ pHi, data = means.df)
 coef(fluor.lm)
 cal.M <- coef(fluor.lm)[2]   # store the gradient
@@ -68,19 +81,23 @@ cal.C <- coef(fluor.lm)[1]    # store the intercept
 #  pHi = (Ratio - C)  /  M
 
 # remind ouselves of the ratio data we loaded earlier
+
 head(BCECF_data)
+
 # now calculte and store the pHi values using the calibration values above
 
 BCECF_data$pHi <- (BCECF_data$ratio - cal.C)  / cal.M
-
+head(BCECF_data)
 
 plot(x=BCECF_data$T_sec/60, y=BCECF_data$pHi, type="l", ylab="Intracellular pH",
      xlab="Time (min)", las=1, xlim=c(0, 14), ylim=c(7.1, 7.9))
 abline(v=c(5,8), lty=2)
 
 segments(x0=5.0, y0=7.7, x1=8.0, y1=7.7)
+
 # It may be easier to add text exactly where you want it later in a desktop publishing package.
 # However, it is good to know that it can be done programmatically.
+
 text(6, 7.8, expression('NH'[4]*'Cl'))
 
 
@@ -91,11 +108,17 @@ text(6, 7.8, expression('NH'[4]*'Cl'))
 
 # fit a line-of-best-fit to a subset of the data -----------------
 # we will use T_min rather than T_sec so that the units are in minutes.
+
 timeWindow <- BCECF_data$T_min >= 9 & BCECF_data$T_min <= 11
+
 # take a look at "timeWindow"  it is a vector of TRUE/FALSE values
 #  this can now be used as an index to subset (or filter) the full data-set.
+
 BCECF_data_sub <- BCECF_data[timeWindow, ]
 BCECF_data_sub  
+
+# now plot the full data set and highlight the subset of data
+
 plot(x=BCECF_data$T_min, y=BCECF_data$pHi, type="l", ylab="Intracellular pH",
      xlab="Time (min)", las=1, xlim=c(0, 14), ylim=c(7.1, 7.9))
 #points(x=BCECF_data_sub$T_sec/60, y=BCECF_data_sub$pHi, col="green")
@@ -103,13 +126,14 @@ lines(x=BCECF_data_sub$T_min, y=BCECF_data_sub$pHi, col="green")
 abline(v=c(9,11), lty=2)
 
 
-# fit a line to the data subset using lm()
+# fit a line to only the data subset using lm()
 
 sub.lm <- lm(pHi ~ T_min, data = BCECF_data_sub)
 coef(sub.lm)
 abline(coef=coef(sub.lm), lty=2, col="grey")
 
-# or you can plot just the subset
+# or you can plot just the subset in its own plot
+
 plot(x=BCECF_data_sub$T_min, y=BCECF_data_sub$pHi, type="l", ylab="Intracellular pH",
      xlab="Time (min)", las=1, xlim=c(8, 12), ylim=c(7.1, 7.9))
 abline(coef=coef(sub.lm), lty=2, col="grey")
