@@ -26,6 +26,7 @@ For absolute beginners, I recommend Dan Navarro's online book ["Learning Statist
 ## BIOL10412/22
 
  - 1 Variability and Sampling
+[R/load_data.R](R/load_data.R) 
 [R/mean_variance.R](R/mean_variance.R)
  - 2 Testing for Differences
 [R/students_t_test.R](R/students_t_test.R)

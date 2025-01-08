@@ -8,18 +8,33 @@
 
 
 heights <- c(1.53, 1.65, 1.67, 1.59, 1.63, 1.72, 1.78, 1.69, 1.68, 1.60, 1.71, 1.68,1.66, 1.66, 1.62, 1.70)
-mean(heights)
-?mean
 
+# more typically, we keep data in a file and load it into R memory.  
+# Changing the data here in R DOES not change the data in the file.
+
+# If you have the data downloaded, you can use this command (remove the leading '#')
+# heights <- scan("data/heights.txt")
+
+mean(heights)
+?mean   # if you see multiple help files listed, choose "base" for base R.
+
+
+# When characterising data we suspect to be normally distributed, we usually also calculate the standard deviation (SD)
 ?sd
 sd(heights)
+
 # no built in function for s.e.m.
 #se = sd / root(N)
-sd(heights) / sqrt(length(heights))
+m / sqrt(length(heights))
 ?range
 ?quantile
 ?qt    # to get the critical t-value for a given degrees of freedom.
 qt(1-(0.05/2), df=Inf)    # 95% of values fall with 1.96 S.E. of the mean. 
 
 # for a sample, need to use the critical value based on samples size (degrees of freedom)
+h.mean <- mean(heights)
+h.sd <- sd(heights)
+barplot(mean(heights), ylim=c(0,2), ylab="height (m)", xlab="mean", xlim=c(0,1.3))
+arrows(x0=0.7, y0=h.mean,  y1=c(h.mean - h.sd, h.mean + h.sd), angle=90)
 
+# this would work much better with multiple groups.
