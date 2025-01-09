@@ -24,7 +24,8 @@ heights_sex <- read.delim("data/heights_sex.tsv")
 heights_male <- heights_sex[heights_sex$sex == "M", "height"]
 heights_female <- heights_sex[heights_sex$sex == "F", "height"]
 t.test(heights_female, heights_male,  paired = FALSE)
-# this is how you would do it if you loaded data from two different sources.
+
+# Above is how you would do it if you loaded data from two different sources.
 # However, our original table is already in a sensible format and
 # we can do the test without changing the table.
 t.test(height ~ sex, data=heights_sex,  paired = FALSE)  
@@ -33,7 +34,7 @@ t.test(height ~ sex, data=heights_sex,  paired = FALSE)
 boxplot(height ~ sex, data=heights_sex, notch=T)
 
 
-# Paired t-test
+# Paired t-test -------------------
 
 beforeVec <- c(65, 71, 78, 60, 45, 55, 96, 51, 64  )
 afterVec <-  c(74, 78, 80, 63, 53, 59, 97, 55, 72)
@@ -67,8 +68,4 @@ sigLabel <- sigLevels$label[ min(which(0.005 < sigLevels$pVal))]
 text(x=1.5, y=110, sigLabel, cex=2)  # put the label on the plot
 
 
-
-
-
-
-# could also show with a barplot of the means. 
+# could also show with a barplot of the means and error bars (standard error or 95% CI). 

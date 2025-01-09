@@ -8,20 +8,44 @@
 
 
 
-# chi-squared test for differences
+# chi-squared test for differences  ----------
 
 peaCounts <- c(69, 31)
 names(peaCounts) <- c("Smooth", "Wrinkled")
+peaCounts
+# test if these numbers differ significantly from expected 3:1 ratio 
+
 chisq.test(peaCounts, p=c(0.75,0.25))
 
-# chi-squared test for association
+# if you want to capture the output and store it, then assign the test result to a new variable
+
+testResult <- chisq.test(peaCounts, p=c(0.75,0.25))
+testResult$p.value
+
+
+# chi-squared test for association ------------
+
+# example of tail loss bias in Lizards. 
+# null hypothesis is that there is no difference between the sexes in proportion that have lost their tails.
+tailLoss <- matrix(c(12,18,18,42), nrow = 2, 
+                   dimnames = list(treatment=c( "Males", "Females"),
+                                   outcome=c("Lost", "Retained")    ))
+tailLoss  # inspect the table
+chisq.test(tailLoss, correct=F)
+
+
+# the next example asks whether shaking trees before winter is associated with chance of the trees falling.
 treeFall <- matrix(c(10,3,5,12), nrow = 2, 
                   dimnames = list(treatment=c( "Control", "Shaken"),
                                   outcome=c("Fallen", "Standing")    ))
+treeFall  # inspect the table
 chisq.test(treeFall, correct=F)  # this one should match other software.
 
 chisq.test(treeFall)  # the default is to apply continuity correction. 
 ### this does not agree with the Graphpad version....
 # see here for explanation https://stats.stackexchange.com/questions/362517/when-to-switch-off-the-continuity-correction-in-chisq-test-function
+
+# in the specific case of 2x2 matrix you can also use Fisher's exact test
+fisher.test(treeFall)
 
 barplot(treeFall, beside=T, legend.text=row.names(treeFall))

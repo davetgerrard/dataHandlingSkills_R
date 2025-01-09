@@ -9,3 +9,27 @@
 
 
 ?cor.test
+
+heart_blood <- read.delim("data/heartRate_BP.tsv")
+
+head(heart_blood)
+dim(heart_blood)
+
+plot(blood_pressure ~ heart_rate, data=heart_blood)
+plot(heart_blood$heart_rate, heart_blood$blood_pressure, 
+     xlab= "Heart Rate",ylab="Blood Pressure")
+
+cor.test(heart_blood$heart_rate, heart_blood$blood_pressure)
+
+# the value "cor" is Pearson's product moment correlation
+# To get R^2, square this value.
+
+testResult <- cor.test(heart_blood$heart_rate, heart_blood$blood_pressure)
+
+?cor.test    #  use '?'  to find out about the Value returned by this function.
+
+testResult$estimate
+testResult$estimate ^ 2
+
+# you can also extract the p-value
+testResult$p.value

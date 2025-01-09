@@ -8,3 +8,134 @@
 
 
 
+wheat_yield <- read.delim("data/nitrogen_wheat.tsv")
+wheat_yield
+
+# this data has different columns for the different treatments. 
+# However, the rows do NOT correspond to the same plant or sample. 
+# In this case, a "long" data-format would be more appropriate 
+#   with one column for yield and another column(s) grouping the samples by treatment.
+# There is a function for re-shaping data 
+
+
+wy_long <-stack(wheat_yield)
+wy_long
+names(wy_long) <- c("Yield", "Treatment")
+
+boxplot(Yield ~ Treatment, data=wy_long)
+
+
+# A more generic function is 'reshape' can be used when the transformation is more complex.
+
+# #reshape(wheat_yield, direction="long", varying=list(1="Low.N", 2="Medium.N", 3="High.N"), v.names="Yield", timevar="Treatment")
+# reshape(wheat_yield, direction="long", varying=c("Low.N", "Medium.N", "High.N"), v.names="Yield", timevar="Treatment")
+# reshape(wheat_yield, direction="long", varying=1:3, v.names="Yield", timevar="Treatment")
+wy_long2 <- reshape(wheat_yield, direction="long", varying=list(1:3),times=c("Low.N", "Medium.N", "High.N"), v.names="Yield", timevar="Treatment")
+wy_long2   
+# 
+
+boxplot(Yield ~ Treatment, data=wy_long2)  #  hmmm, this order (alphabetical is not so nice).
+
+
+aov(Yield ~ Treatment, data=wy_long)
+
+model <- aov(Yield ~ Treatment, data=wy_long)
+summary(model)
+
+# which treatments are different from each other?
+
+TukeyHSD(model)
+# both high and medium treatments are significantly different from the low treatment
+#  OR to put it more succintly, the low Nitrogen treatment produces significantly 
+#  lower wheat yield than both the medium and high treatments.
+# AND There is no signficant difference in yield between the medium and high Nitrogen treatments.
+
+# there is also a plot associated with this test
+plot(TukeyHSD(model))
+# the default layout is a bit hard to read but can be adjusted.  
+par(mar=c(5,10,5,2))    # sizes of bottom, left, top and right margins, in that order.
+plot(TukeyHSD(model), las=1, ylim=c(0,4))  # las sets all text horizontal, expand the vertical plotting range.
+dev.off()   # do this after saving the plot so that par() is reset to defaults. 
+
+
+# One-way ANOVA with repeated measures- ------------
+
+glucoseRep <- read.delim("data/repeated_glucose.tsv")
+glucoseRep
+
+#names(glucoseRep) <- c("Person", "Glucose_0", "Glucose_30", "Glucose_60", "Glucose_90", "Glucose_120")
+#reshape(glucoseRep, direction="long", varying=2:6, idvar="Person", v.names="Glucose", timevar="Glucose")
+
+#gr_long <-  reshape(glucoseRep, direction="long", varying=list(2:6), idvar="Person", v.names="Glucose", sep="_", times=c(0,30,60,90,120))
+
+#let's get this in "long" format
+gr_long <-  reshape(glucoseRep, direction="long", timevar="Time", varying=list(2:6), idvar="Person", v.names="Glucose", times=c(0,30,60,90,120))
+gr_long <-  reshape(glucoseRep, direction="long", timevar="Time", varying=list(2:6), idvar="Person", v.names="Glucose", times=c("Baseline","30","60","90","120"))
+# called swap 0 for Baseline
+gr_long$Time <- factor(gr_long$Time, level=c("Baseline","30","60","90","120"))
+
+# plot the data 
+boxplot(Glucose ~ Time, data=gr_long)
+# might be better to plot individual responses. 
+
+# how to specify a model with repeated measures. 
+# https://stackoverflow.com/a/42664178/1129734
+#  the Person is a "random" effect
+#  the time is a "fixed" effect
+#  The effect of time is "nested" within the different people (Person).
+
+model <- aov(Glucose ~ Time + Error(Person/Time), data=gr_long)
+summary(model)
+
+# To find which times are different from the Baseline, we need an all-against-one approach. 
+# Dunnett's test is appropriate but R lacks a method for an aov ANOVA model. 
+
+
+# There is a method defined for another ANOVA approach, lme() from the nlme package.
+# To use this, we will need to load some packages. 
+
+library(nlme)         ## for lme()
+library(multcomp)  ## for multiple comparison stuff
+# If either package fails to load, use install.packages(c("nlme", "multicomp"))  
+
+Aov.mod <- aov(Glucose ~ Time + Error(Person/Time), data=gr_long)
+Lme.mod <- lme(Glucose ~ Time, random = ~1 | Person/Time, data = gr_long)
+
+summary(Aov.mod)
+anova(Lme.mod)
+
+summary(Lme.mod)
+summary(glht(Lme.mod, linfct=mcp(Time="Tukey")))  # all against all.
+summary(glht(Lme.mod, linfct=mcp(Time="Dunnett")))  # all against one, this is what we wanted.
+
+# Research
+# https://imaging.mrc-cbu.cam.ac.uk/statswiki/FAQ/Dunnett
+# https://imaging.mrc-cbu.cam.ac.uk/statswiki/FAQ/dunR
+# https://stats.stackexchange.com/a/14142  # suggest nlme
+# https://stats.stackexchange.com/a/760 # suggests ANOVA, then pairwise.t.test() adjusted using BH corrections
+
+
+# DEVELOPMENT ----------------
+# Other approaches tried
+library(multcomp)
+
+model_dun <- glht(model,linfct = mcp(treatment = "Dunnett"), alternative = "greater")
+
+summary(model_dun) 
+
+model <- aov(Glucose ~ Time + Error(Person/Time), data=gr_long)
+summary(model)
+
+
+pairwise.t.test(gr_long$Glucose, gr_long$Time, p.adjust.method = "BH")
+# all against all. (so not equivalent to Dunnett's "all vs one")
+
+# plotting individual lines is nice but complex.
+stripchart(Glucose ~ Time, data=gr_long, vertical=T, xlab="Time", ylim=c(0, 12)) 
+# join the points with lines
+segments(x0=rep(1:4, each=5),   y0=gr_long$Glucose[1:20],
+        x1=rep(2:5, each=5),   y1=gr_long$Glucose[6:25]) 
+# this only works because the data are perfectly sequenced.  
+  
+
+# Could also plot the mean for each time-point with error-bars.  

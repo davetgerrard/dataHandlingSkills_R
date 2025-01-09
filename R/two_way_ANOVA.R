@@ -8,3 +8,38 @@
 
 
 
+wheat_var <- read.delim("data/wheat_variety_nitrogen.tsv", stringsAsFactors = T)
+# this is already in long format.  We used stringsAsFactors so that R treats columns 
+#  with strings (words) as factors. Useful when doing statistical modelling.
+
+summary(wheat_var)
+levels(wheat_var$Nitrogen)  # not the best order
+wheat_var$Nitrogen  <- factor(wheat_var$Nitrogen, levels=c("Low", "Medium", "High"))
+summary(wheat_var)  # better
+
+#plot(Yield ~ Nitrogen + Variety, data=wheat_var)   # two separate plots
+#barplot(Yield ~ Nitrogen + Variety, data=wheat_var) 
+
+yieldMeans <- as.table(by(data=wheat_var$Yield, INDICES=list(wheat_var$Variety,wheat_var$Nitrogen), mean))
+
+barplot(yieldMeans, beside=T, ylab="Yield",xlab="Nitrogen", legend.text = c("V1", "V2"), args.legend = list(x="topleft"))
+
+
+# Fit the model
+
+model <- aov(Yield ~ Nitrogen * Variety, data=wheat_var)   # use * to model each factor AND their interaction
+model
+summary(model)
+
+# It doesn't make sense to label signficant differences on this plot as the effect is 
+# across all bars of the barplot.
+# However,  a Tukey test could still be applied
+
+TukeyHSD(model)  # lots of comparisons here!
+
+plot(TukeyHSD(model))
+# The default plot layout is not great. 
+par(mar=c(5,10,5,2))
+plot(TukeyHSD(model), las=1)
+dev.off()   # to restore plot to defaults
+# take a look at the biggest effect size, does it make sense looking back at the barplot?
