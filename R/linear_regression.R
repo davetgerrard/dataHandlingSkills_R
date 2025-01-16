@@ -7,4 +7,105 @@
 #  https://github.com/davetgerrard/dataHandlingSkills_R/
 
 
+egg_mass <- read.delim("data/eggMass.tsv")
+
+dim(egg_mass)  # how many rows and columns
+head(egg_mass)
+
+# always a good idea to try and plot your data.
+plot(Mass ~ Days, data = egg_mass)
+
+# now fit a linear model
+model <- lm(Mass ~ Days, data = egg_mass)
+
+# what are the slope and intercept
+coefficients(model)  #  Intercept and slope  
+
+# but are these coeffecicents significantly different from zero?
+summary(model)
+
+# you can capture some of these metrics (e.g. R-square value)
+# see help pages for summary.lm(), which is the function that is called when you run 
+# the generic summary() function is called on the output from lm()
+?summary.lm
+sm <- summary(model)
+sm$r.squared
+
+
+
+# exponential decay ------------
+
+blood_drug <- read.delim("data/blood_drug.tsv")
+
+# always a good idea to try and plot your data.
+plot(Concentration_uM ~ Time_min , data = blood_drug)
+
+# decrease over time but perhaps not linear.
+
+blood_drug$lnC <- log(blood_drug$Concentration_uM)
+
+plot(lnC ~ Time_min , data = blood_drug)
+
+# now fit a linear model
+model <- lm(lnC ~ Time_min, data = blood_drug)
+
+# what are the slope and intercept
+coefficients(model)  #  Intercept and slope  
+
+# but are these coeffecicents significantly different from zero?
+summary(model)
+
+
+# Calculate the initial concentration of the drug in the blood
+# This you can work out from the Y-axis intercept, 
+# which should be equal to lnC0. 
+# Remember the inverse function for natural logs?
+
+# in R there is function just for this
+?exp()
+
+
+# Lineweaver-Burke plot examle ------------------
+
+enzyme_kinetic <- read.delim("data/enzyme_kinetic.tsv")
+
+dim(enzyme_kinetic)
+
+enzyme_kinetic
+
+# always a good idea to try and plot your data.
+plot(rate_v ~ conc_S , data = enzyme_kinetic)
+
+#  [would be useful to show the fit of a linear model to this]
+
+# the Lineweaver-Burk plot, which plots 1/v on the Y-axis against 1/[S] on the X-axis
+
+enzyme_kinetic$inv_S <- 1/enzyme_kinetic$conc_S
+enzyme_kinetic$inv_v <- 1/enzyme_kinetic$rate_v
+
+plot(inv_v ~ inv_S , data = enzyme_kinetic, xlab="1/[S]", ylab="1/v")
+
+# now fit a linear model
+model <- lm(inv_v ~ inv_S , data = enzyme_kinetic)
+
+# what are the slope and intercept
+coefficients(model)  #  Intercept and slope  
+
+# but are these coeffecicents significantly different from zero?
+summary(model)
+
+# calculate Vmax and Km from the slope and intercept
+# Again, some maths is required. 
+# The Y-axis intercept will be 1/Vmax, so that allows you to calculate Vmax.
+# Then, using that value for Vmax, you can calculate Km from the slope. 
+# Remember that slope = Km/Vmax, so you can rearrange that to read Km = ...
+
+
+# Non-linear regression -------------------------------------
+
+# repeat line-fitting for both blood_drug and enzyme_kinetic examples using non-linear regression
+
+
+
+
 
