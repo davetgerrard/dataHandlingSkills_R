@@ -31,28 +31,39 @@ summary(model)
 sm <- summary(model)
 sm$r.squared
 
+# the model coefficients (intercept and slope) can be used to put the line on the plot.
+plot(Mass ~ Days, data = egg_mass)
+abline(a= coefficients(model)[1], b=coefficients(model)[2])
 
 
-# exponential decay ------------
+# exponential decay using transformed variables ------------
 
 blood_drug <- read.delim("data/blood_drug.tsv")
+
+head(blood_drug)
 
 # always a good idea to try and plot your data.
 plot(Concentration_uM ~ Time_min , data = blood_drug)
 
 # decrease over time but perhaps not linear.
 
+# C = Co * exp(-λ * t)
+# linearised as
+# lnC = lnCo - (λ * t )
+# note that time 't' is not logged
+
 blood_drug$lnC <- log(blood_drug$Concentration_uM)
+head(blood_drug)   # check this has been added
 
 plot(lnC ~ Time_min , data = blood_drug)
 
 # now fit a linear model
-model <- lm(lnC ~ Time_min, data = blood_drug)
+model <- lm(lnC ~ Time_min , data = blood_drug)
 
 # what are the slope and intercept
 coefficients(model)  #  Intercept and slope  
 
-# but are these coeffecicents significantly different from zero?
+# but are these coefficients significantly different from zero?
 summary(model)
 
 
@@ -64,8 +75,23 @@ summary(model)
 # in R there is function just for this
 ?exp()
 
+model.int <- coefficients(model)[1]   # lnCo
+model.slope <- coefficients(model)[2]   # also equal λ (lamda)
+model.Co <- exp(model.int)   # initial value of C at time zero
+model.lamda <- -model.slope
+model.halfLife <- 0.693 / model.lamda  # a standard conversion factor 
 
-# Lineweaver-Burke plot examle ------------------
+test_x <- 1:30
+plot(lnC ~ Time_min , data = blood_drug)
+lines(test_x, predict(model, list(Time_min=test_x)), lty=2)
+
+# now plot the original data using a decay curve with parameters we got from the linear-fit
+plot(Concentration_uM ~ Time_min , data = blood_drug, xlim=c(0,30), ylim=c(0,model.Co))
+test_y <- model.Co * exp(-test_x * model.lamda)   # equation for decay using our parameter estimates.
+lines(test_x, test_y)
+
+
+# Lineweaver-Burke plot example (using transformed variables) ------------------
 
 enzyme_kinetic <- read.delim("data/enzyme_kinetic.tsv")
 
@@ -78,7 +104,8 @@ plot(rate_v ~ conc_S , data = enzyme_kinetic)
 
 #  [would be useful to show the fit of a linear model to this]
 
-# the Lineweaver-Burk plot, which plots 1/v on the Y-axis against 1/[S] on the X-axis
+# the Lineweaver-Burk plot, which plots 1/v on the Y-axis 
+# against 1/[S] on the X-axis
 
 enzyme_kinetic$inv_S <- 1/enzyme_kinetic$conc_S
 enzyme_kinetic$inv_v <- 1/enzyme_kinetic$rate_v
@@ -100,12 +127,125 @@ summary(model)
 # Then, using that value for Vmax, you can calculate Km from the slope. 
 # Remember that slope = Km/Vmax, so you can rearrange that to read Km = ...
 
+model.int <- coefficients(model)[1]
+model.Vmax <- 1/ model.int
+model.slope <- coefficients(model)[2]
+model.Km <- model.slope * model.Vmax
 
-# Non-linear regression -------------------------------------
+# Non-linear regression example 1 blood drug -------------------------------------
+
 
 # repeat line-fitting for both blood_drug and enzyme_kinetic examples using non-linear regression
 
+# Non-linear 1: blood drug (exponential decay)
+
+model <- nls(Concentration_uM ~ Co * exp(-Time_min * b)  , data=blood_drug, 
+             start=list(Co=100, b=0.1))  # Co  = starting concentration;  b= lambda
+
+summary(model)
+coefficients(model)
+cor(blood_drug$Concentration_uM,predict(model))
+
+plot(Concentration_uM ~ Time_min , data = blood_drug, xlim=c(0,30), ylim=c(0,100))
+lines(blood_drug$Time_min, predict(model, list(Time_min=blood_drug$Time_min)),lty=2,col="red",lwd=3)
+
+# extract specific parameters if needed directly from model (c.f. linear version above)
+model.Co <- coefficients(model)[1]   # initial value of C at time zero
+model.lamda <-  coefficients(model)[2] 
+model.halfLife <- 0.693 / model.lamda  # a standard conversion factor 
+
+
+# Non-linear regression example 2 : Michaelis Menten kinetics ----------------------
+
+
+#Michaelis Menten equation
+
+#    v = (Vmax * S)  /  (Km  +  S) 
+
+ plot(rate_v ~ conc_S , data = enzyme_kinetic)
+# as per learning materials
+model <- nls(rate_v ~ (Vmax * conc_S) / (Km + conc_S)  , data=enzyme_kinetic)
+# as per Crawley's R book (and nowhere else?)
+#model <- nls(rate_v ~ (Vmax * conc_S) / (1 + Km * conc_S)  , data=enzyme_kinetic)
+
+# first, using parameters estimated (roughly) from plot.  
+# Could also use parameters from linear model above.
+model <- nls(rate_v ~ (Vmax * conc_S) / (Km + conc_S)  , data=enzyme_kinetic,
+             start=list(Vmax=45, Km=5))
+
+
+cor(enzyme_kinetic$rate_v,predict(model))
+
+plot(rate_v ~ conc_S , data = enzyme_kinetic)
+lines(enzyme_kinetic$conc_S,predict(model, list(conc_S=enzyme_kinetic$conc_S)),lty=2,col="red",lwd=3 )
+coefficients(model)
+summary(model)
+# the coefficients suggest this model has a much higher Vmax than we started with
+plot(rate_v ~ conc_S , data = enzyme_kinetic, ylim=c(0,100), xlim=c(0, 100))
+lines(enzyme_kinetic$conc_S,predict(model, list(conc_S=enzyme_kinetic$conc_S)),lty=2,col="red",lwd=3 )
+# could use more x points to give a finer line
+plot(rate_v ~ conc_S , data = enzyme_kinetic, ylim=c(0,100), xlim=c(0, 100))
+lines(0:100,predict(model, list(conc_S=0:100)),lty=2,col="red",lwd=3 )
+abline(h=coefficients(model)[1], lty=2)
 
 
 
 
+
+# Further resources ------------------------
+# Tutorials and guides
+#  https://datascienceplus.com/first-steps-with-non-linear-regression-in-r/
+
+
+
+# Development and testing --------------------------
+
+# Generate some data following the two specifications of Michaelis-Menten kinetics.
+# Need to add some random noise because otherwise the nls() function will
+# fail to converge - i.e. if it starts with a perfect fit.  [a previous demo failed for this reason]
+
+# 
+# test_x <- 1:20
+# test_cy <- ((45*test_x) / (1 + .5* test_x) ) + rnorm(n=length(test_x), mean=0, sd=2) # formula in crawley (plus some normal noise)
+# 
+# plot(test_x, test_cy)
+# 
+# test_by <- ((45*test_x) / ( .5  + test_x) ) + rnorm(n=length(test_x), mean=0, sd=2)  # formula in learning materials.(plus some normal noise) THis one seems to have larger scatter.
+# plot(test_x, test_by)
+# 
+# #  use maxVal for asymptotic max (on y-axis).  
+# #  use K for value of x at which y is half of maxVal
+# model_cy <- nls(test_cy ~ (maxVal * test_x ) / (1 + K * test_x), start=list(maxVal=45, K=5) )
+# cor(test_cy,predict(model_cy))
+# model_by <- nls(test_by ~ (maxVal * test_x) / ( K + test_x), start=list(maxVal=45, K=5) )
+# cor(test_by,predict(model_by))
+# 
+# coefficients(model_cy)
+# coefficients(model_by)
+# 
+# plot(test_x, test_cy, ylim=c(0,100))
+# lines(test_x,predict(model_cy),lty=2,col="red",lwd=3)
+# 
+# plot(test_x, test_by, ylim=c(0,50))
+# lines(test_x,predict(model_by),lty=2,col="red",lwd=3)
+# 
+# # now try fitting Crawley model to other specified and vice versa
+# 
+# model_cy2 <- nls(test_by ~ (maxVal * test_x ) / (1 + K * test_x), start=list(maxVal=45, K=5) )
+# cor(test_by,predict(model_cy2))
+# model_by2 <- nls(test_cy ~ (maxVal * test_x) / ( K + test_x), start=list(maxVal=45, K=5) )
+# cor(test_cy,predict(model_by))
+# 
+# coefficients(model_cy2)
+# coefficients(model_by2)
+# 
+# plot(test_x, test_cy, ylim=c(0,100))
+# lines(test_x,predict(model_by2),lty=2,col="red",lwd=3)
+# 
+# plot(test_x, test_by, ylim=c(0,50))
+# lines(test_x,predict(model_cy2),lty=2,col="red",lwd=3)
+#
+# another learning point is whether these functions should be asymptotic (bound) or unbounded.
+# With enzyme kinetics, there is a maximum rate that cannot be exceeded, hence we think
+# an asymptotic function fits.  For most values, a logarithmic (unbounded) function would work well
+#  but is  less appealing, theoretically.
