@@ -6,6 +6,7 @@
 # If you are new to using R please read my advice here:
 #  https://github.com/davetgerrard/dataHandlingSkills_R/
 
+# TODO split this out into two similar scripts each one using just one data-set
 
 egg_mass <- read.delim("data/eggMass.tsv")
 

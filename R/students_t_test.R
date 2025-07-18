@@ -69,3 +69,11 @@ text(x=1.5, y=110, sigLabel, cex=2)  # put the label on the plot
 
 
 # could also show with a barplot of the means and error bars (standard error or 95% CI). 
+
+
+# check if a one-sample t-test on the differences between the pairs 
+# is equivalent to the paired t-test.
+
+repMeasures$diff <- repMeasures$after - repMeasures$before
+
+t.test(repMeasures$diff, mu=0)  # this should be identical except perhaps 
